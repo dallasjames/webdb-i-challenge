@@ -5,7 +5,13 @@ const router = express.Router()
 
 router.get("/", async (req, res, next) => {
     try {
-        res.json(await db("accounts"))
+        if (!req.query.limit || !req.query.name || !req.query.order) {
+            res.json(await db("accounts"))
+        } else {
+            res.json(await db("accounts")
+            .orderBy(req.query.name.toString(), req.query.order.toString())
+            .limit(req.query.limit))
+        }
     } catch(err) {
         next(err)
     }
@@ -27,7 +33,7 @@ router.post("/", async (req, res, next) => {
             budget: req.body.budget
         }
         const [id] = await db("accounts").insert(payload)
-        res.json({message: `posted: ${payload}`})
+        res.json(id)
     } catch(err) {
         next(err)
     }
